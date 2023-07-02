@@ -6,12 +6,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-var connectionString = "neo4j://localhost:7687"; // Neo4j server URI
+var connectionString = "bolt://localhost:7687"; // Neo4j server URI
 var username = "neo4j"; // Neo4j username
 var password = "password"; // Neo4j password
 
 // Create a new instance of GraphClient
-var graphClient = new GraphClient(new Uri(connectionString), username, password);
+var graphClient = new BoltGraphClient(new Uri(connectionString), username, password);
 
 // Connect to the Neo4j database
 graphClient.ConnectAsync();

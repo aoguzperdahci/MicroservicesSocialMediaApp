@@ -13,20 +13,16 @@ namespace FollowerService.Controllers
         private readonly IGraphClient _graphClient;
 
 
-
-        //private readonly ILogger<WeatherForecastController> _logger;
-        //private readonly IGraphClient _client;
-
         public WeatherForecastController(IGraphClient graphClient)
         {
-            //_logger = logger;
+            
 
             // Connect to the Neo4j database
             _graphClient = graphClient;
-            //_client = client;
+          
         }
 
-        [HttpGet]/*(Name = "GetWeatherForecast")*/
+        [HttpGet]
         public async Task<IActionResult> Get()
         {
             var followers = await _graphClient.Cypher.Match("(n:User)")
@@ -43,35 +39,31 @@ namespace FollowerService.Controllers
             return Ok();
         }
 
-       [HttpDelete("{name}")]/*(Name = "GetWeatherForecast")*/
-        public async Task<IActionResult> Delete(string name)
+       [HttpDelete("{followerUsername}")]/*(Name = "GetWeatherForecast")*/
+        public async Task<IActionResult> Unfollow(string followerUsername, string followeeUsername)
         {
+
             var query = _graphClient.Cypher
-                .Match("(u:User {name: $name})-[r]-()")
-                .Delete("r, u")
-                .WithParam("name", name);
+                .Match("(follower:User)-[r:is_following]->(followee:User)")
+                .Where((User follower) => follower.Username == followerUsername)
+                .AndWhere((User followee) => followee.Username == followeeUsername)
+                .Delete("r");
 
             await query.ExecuteWithoutResultsAsync();
+
             return Ok();
+
         }
 
-        /*public async Task<IActionResult> Delete(string usrName)
-        {
-            await _graphClient.Cypher.Create("(u:User)")
-                .Where((User u) => u.Username == usrName)
-                .Delete("u")
-                .ExecuteWithoutResultsAsync();
 
-            return Ok();
-        }*/
         [HttpPost]
         [Route("api/users/{followerUsername}/follow")]
         
         public async Task<IActionResult> FollowUser(string followerUsername, string followeeUsername)
         {
             var query = _graphClient.Cypher
-    .Match("(follower:User {name: $followerUsername})")
-    .Match("(followee:User {name: $followeeUsername})")
+    .Match("(follower:User {Username: $followerUsername})")
+    .Match("(followee:User {Username: $followeeUsername})")
     .Create("(follower)-[:is_following]->(followee)");
 
             var parameters = new
@@ -83,63 +75,43 @@ namespace FollowerService.Controllers
             await query.WithParams(parameters).ExecuteWithoutResultsAsync();
 
             return Ok();
-            /* try
-             {
-                 var query = _graphClient.Cypher
-                     .Match("(follower:User {name: {sername}})")
-                     .Match("(followee:User {name: {followeeUsername}})")
-                     .Create("(follower)-[:is_following]->(followee)");
 
-                 var parameters = new
-                 {
-                     followerUsername,
-                     followeeUsername
-                 };
-
-                 await query.WithParams(parameters).ExecuteWithoutResultsAsync();
-
-                 return Ok();
-             }
-             catch (Exception ex)
-             {
-                 // Handle any exceptions
-                 return StatusCode(500, "An error occurred while following the user.");
-             }*/
         }
 
-        /* public async Task<IActionResult> FollowUser(string followerUsername, string followedUsername)
-         {
-             await _graphClient.Cypher
-     .Match("(follower:User)", "(followed:User)")
-         .Where((User follower) => follower.Username == followerUsername)
-         .AndWhere((User followed) => followed.Username == followedUsername)
-         .CreateUnique("(follower)-[:IS_FOLLOWING]->(followed)")
-         .ExecuteWithoutResultsAsync();
-             return Ok();
-         }*/
+
 
         [HttpGet("{username}/isfollowing")]
-
-        public async Task<IActionResult> GetFollowing(string username)
+        
+        public async Task<ActionResult> IsFollowing(string username)
         {
-            //MATCH(follower: User) -[:IS_FOLLOWING]->(user: User { name: 'Jane Smith'}) RETURN follower
             var query = _graphClient.Cypher
-                .Match("(follower:User {name: $username})-[:IS_FOLLOWING]->(followed:User)")
-                .Return(followed => followed.As<User>())
-                .ResultsAsync;
+    .Match("(follower:User {Username: $username})-[:is_following]->(followed:User)")
+    .WithParam("username", username)
+    .Return(followed => followed.As<User>())
+    .ResultsAsync;
 
-            return Ok(query);
+            var results = await query;
+
+            return Ok(results);
+
         }
+
+
 
         [HttpGet("{username}/followers")]
         public async Task<IActionResult> GetFollowers(string username)
         {
-            var followers =  _graphClient.Cypher
-                .Match("(follower:User)-[:IS_FOLLOWING]->(user:User {name: $username})")
+            var query =  _graphClient.Cypher
+                .Match("(follower:User)-[:is_following]->(followed:User {Username: $username})")
+                .WithParam("username", username)
                 .Return(follower => follower.As<User>())
                 .ResultsAsync;
 
-            return Ok(followers);
+
+
+            var results = await query;
+
+            return Ok(results);
         }
 
 

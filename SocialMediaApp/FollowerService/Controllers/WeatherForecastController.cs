@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Neo4jClient;
+using UserService.Entities;
 
 namespace FollowerService.Controllers
 {
@@ -6,28 +8,49 @@ namespace FollowerService.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
+        private readonly IGraphClient _graphClient;
 
-        private readonly ILogger<WeatherForecastController> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+
+        //private readonly ILogger<WeatherForecastController> _logger;
+        //private readonly IGraphClient _client;
+
+        public WeatherForecastController(IGraphClient graphClient)
         {
-            _logger = logger;
+            //_logger = logger;
+
+            // Connect to the Neo4j database
+            _graphClient = graphClient;
+            //_client = client;
         }
 
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        [HttpGet]/*(Name = "GetWeatherForecast")*/
+        public async Task<IActionResult> Get()
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+            var followers = await _graphClient.Cypher.Match("(n:User)")
+                .Return(nameof => nameof.As<User>()).ResultsAsync;
+            return Ok(followers);
         }
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] User usr)
+        {
+            await _graphClient.Cypher.Create("(u:User $usr)")
+                .WithParam("usr", usr)
+                .ExecuteWithoutResultsAsync();
+
+            return Ok();
+        }
+
+        [HttpDelete("{username}")]/*(Name = "GetWeatherForecast")*/
+        public async Task<IActionResult> Delete(string usrName)
+        {
+            await _graphClient.Cypher.Create("(u:User)")
+                .Where((User u) => u.Username == usrName)
+                .Delete("u")
+                .ExecuteWithoutResultsAsync();
+
+            return Ok();
+        }
+
     }
 }

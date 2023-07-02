@@ -1,3 +1,4 @@
+using FollowerService.Consumers;
 using Microsoft.AspNetCore.Mvc;
 using Neo4jClient;
 using Neo4jClient.Cypher;
@@ -10,25 +11,37 @@ namespace FollowerService.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
+
         private readonly IGraphClient _graphClient;
+        private readonly UserCreatedEventConsumer _userCreatedEventConsumer;
 
 
-        public WeatherForecastController(IGraphClient graphClient)
+        public WeatherForecastController(IGraphClient graphClient, UserCreatedEventConsumer userCreatedEventConsumer)
         {
             
 
             // Connect to the Neo4j database
             _graphClient = graphClient;
-          
-        }
+            _userCreatedEventConsumer = userCreatedEventConsumer;
 
-        [HttpGet]
+        }
+        [HttpGet("username")]
+        public IActionResult GetUsername()
+        {
+            // Access the username value from the UserCreatedEventConsumer
+            string username = _userCreatedEventConsumer;
+
+            // Use the username value in your controller logic
+
+            return Ok(username);
+        }
+        /*[HttpGet]
         public async Task<IActionResult> Get()
         {
             var followers = await _graphClient.Cypher.Match("(n:User)")
                 .Return(nameof => nameof.As<User>()).ResultsAsync;
             return Ok(followers);
-        }
+        }*/
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] User usr)
         {

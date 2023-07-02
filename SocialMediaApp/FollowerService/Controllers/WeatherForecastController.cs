@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Neo4jClient;
+using Neo4jClient.Cypher;
 using UserService.Entities;
 
 namespace FollowerService.Controllers
@@ -51,6 +52,44 @@ namespace FollowerService.Controllers
 
             return Ok();
         }
+        public async Task<IActionResult> FollowUser(string followerUsername, string followedUsername)
+        {
+            await _graphClient.Cypher
+    .Match("(follower:User)", "(followed:User)")
+        .Where((User follower) => follower.Username == followerUsername)
+        .AndWhere((User followed) => followed.Username == followedUsername)
+        .CreateUnique("(follower)-[:IS_FOLLOWING]->(followed)")
+        .ExecuteWithoutResultsAsync();
+            return Ok();
+        }
+
+    [HttpGet("{username}/isfollowing")]
+
+        public async Task<IActionResult> GetFollowing(string username)
+        {
+            //MATCH(follower: User) -[:IS_FOLLOWING]->(user: User { name: 'Jane Smith'}) RETURN follower
+            var query = _graphClient.Cypher
+                .Match("(follower:User {Username: $username})-[:IS_FOLLOWING]->(followed:User)")
+                .Return(followed => followed.As<User>())
+                .ResultsAsync;
+
+            return Ok(query);
+        }
+
+        [HttpGet("{username}/followers")]
+        public async Task<IActionResult> GetFollowers(string username)
+        {
+            var followers =  _graphClient.Cypher
+                .Match("(follower:User)-[:IS_FOLLOWING]->(user:User {Username: $username})")
+                .Return(follower => follower.As<User>())
+                .ResultsAsync;
+
+            return Ok(followers);
+        }
+
+
+
+
     }
 }
 

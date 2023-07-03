@@ -115,7 +115,7 @@ namespace PostService.Services
 
         {
 
-            // Medya service'den filename gelecek
+            
             var uniqueFileName = FileHelper.GetUniqueFileName(postRequest.Image.FileName);
 
 

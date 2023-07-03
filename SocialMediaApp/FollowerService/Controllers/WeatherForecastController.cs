@@ -2,8 +2,13 @@ using FollowerService.Consumers;
 using Microsoft.AspNetCore.Mvc;
 using Neo4jClient;
 using Neo4jClient.Cypher;
+using RabbitMQ.Client.Events;
+using RabbitMQ.Client;
 using System.Xml.Linq;
 using UserService.Entities;
+using System.Text;
+using System.Linq;
+
 
 namespace FollowerService.Controllers
 {
@@ -13,7 +18,6 @@ namespace FollowerService.Controllers
     {
 
         private readonly IGraphClient _graphClient;
-        private readonly UserCreatedEventConsumer _userCreatedEventConsumer;
 
 
         public WeatherForecastController(IGraphClient graphClient, UserCreatedEventConsumer userCreatedEventConsumer)
@@ -22,35 +26,11 @@ namespace FollowerService.Controllers
 
             // Connect to the Neo4j database
             _graphClient = graphClient;
-            _userCreatedEventConsumer = userCreatedEventConsumer;
+            
 
         }
-        [HttpGet("username")]
-        public IActionResult GetUsername()
-        {
-            // Access the username value from the UserCreatedEventConsumer
-            string username = _userCreatedEventConsumer;
 
-            // Use the username value in your controller logic
 
-            return Ok(username);
-        }
-        /*[HttpGet]
-        public async Task<IActionResult> Get()
-        {
-            var followers = await _graphClient.Cypher.Match("(n:User)")
-                .Return(nameof => nameof.As<User>()).ResultsAsync;
-            return Ok(followers);
-        }*/
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] User usr)
-        {
-            await _graphClient.Cypher.Create("(u:User $usr)")
-                .WithParam("usr", usr)
-                .ExecuteWithoutResultsAsync();
-
-            return Ok();
-        }
 
        [HttpDelete("{followerUsername}")]/*(Name = "GetWeatherForecast")*/
         public async Task<IActionResult> Unfollow(string followerUsername, string followeeUsername)
@@ -100,10 +80,14 @@ namespace FollowerService.Controllers
             var query = _graphClient.Cypher
     .Match("(follower:User {Username: $username})-[:is_following]->(followed:User)")
     .WithParam("username", username)
-    .Return(followed => followed.As<User>())
-    .ResultsAsync;
+                .Return(followed => followed.As<User>().Username)
+                .ResultsAsync;
+
+
 
             var results = await query;
+
+
 
             return Ok(results);
 
@@ -117,12 +101,14 @@ namespace FollowerService.Controllers
             var query =  _graphClient.Cypher
                 .Match("(follower:User)-[:is_following]->(followed:User {Username: $username})")
                 .WithParam("username", username)
-                .Return(follower => follower.As<User>())
+                .Return(follower => follower.As<User>().Username)
                 .ResultsAsync;
 
 
 
             var results = await query;
+
+            
 
             return Ok(results);
         }

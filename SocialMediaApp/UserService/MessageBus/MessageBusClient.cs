@@ -68,7 +68,7 @@ namespace UserService.MessageBus
                             body: body);
         }
 
-        public void PublishCreateUserEvent(string message)
+        public void PublishCreateUserEvent(string message) //gets username as the message
         {
             MessageEvent messageEvent = new MessageEvent { EventType = "UserCreated", Message = message };
             SendMessage(JsonSerializer.Serialize(messageEvent));

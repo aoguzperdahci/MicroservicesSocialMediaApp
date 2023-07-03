@@ -26,13 +26,16 @@ namespace MediaService.Controllers
                 var extension = "." + file.FileName.Split('.')[file.FileName.Split('.').Length - 1];
                 filename = DateTime.Now.Ticks.ToString() + extension;
 
-                var filepath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\MediaFiles", filename);
+                var filepath = Path.Combine("c://socialMedia", filename);
 
                 if(!Directory.Exists(filepath))
                 {
                     Directory.CreateDirectory(filepath);
                 }
-                var exactpath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\MediaFiles", filename);
+                
+                var exactpath = Path.Combine("c://socialMedia", filename);
+
+                //var exactpath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\MediaFiles", filename);
                 using (var stream = new FileStream(exactpath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);

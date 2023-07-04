@@ -117,27 +117,14 @@ namespace PostService.Services
 
             
             var uniqueFileName = FileHelper.GetUniqueFileName(postRequest.Image.FileName);
-
-
-
-
             var uploads = Path.Combine(environment.WebRootPath, "users", "posts", postRequest.UserId.ToString());
 
-
-
-
             var filePath = Path.Combine(uploads, uniqueFileName);
-
-
-
 
             Directory.CreateDirectory(Path.GetDirectoryName(filePath));
 
 
             await postRequest.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
-
-
-
 
             postRequest.ImagePath = filePath;
 

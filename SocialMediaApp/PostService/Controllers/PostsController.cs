@@ -35,13 +35,13 @@ namespace PostService.Controllers
         [HttpPost]
 
 
-        [Route("")]
+        [Route("{username}")]
 
 
         [RequestSizeLimit(5 * 1024 * 1024)]
 
 
-        public async Task<IActionResult> SubmitPost([FromForm] PostRequest postRequest)
+        public async Task<IActionResult> SubmitPost([FromForm] PostRequest postRequest, string username)
 
 
         {
@@ -75,6 +75,23 @@ namespace PostService.Controllers
 
 
             {
+               
+
+                // Send a request to the Media service to save the selected image
+                using (var httpClient = new HttpClient())
+                {
+                    var mediaServiceUrl = "http://localhost:7040/api/media"; // Replace with the actual Media service URL
+                    var formData = new MultipartFormDataContent();
+                    formData.Add(new StringContent(postRequest.ImagePath),"file");
+                    formData.Add(new StringContent(username), "username");
+
+                    var response = await httpClient.PostAsync($"{mediaServiceUrl}/api/media", formData);
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        return StatusCode((int)response.StatusCode, "Error occurred while saving the image in the Media service.");
+                    }
+                }
 
 
                 await postService.SavePostImageAsync(postRequest);

@@ -9,7 +9,9 @@ namespace MediaService.Controllers
     {
 
 
-        [HttpGet("{username}/{filename}")]
+        //[HttpGet("{username}/{filename}")]
+        [HttpPost]
+        [Route("api/media")]
         private async Task<IActionResult> WriteFile(string username, string filename, IFormFile file)
         {
            // string filename = "";
@@ -36,7 +38,7 @@ namespace MediaService.Controllers
             catch (Exception ex)
             {
             }
-            return Ok();
+            return Ok("Image saved");
         }
 
 

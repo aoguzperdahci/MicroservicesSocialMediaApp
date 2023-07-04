@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using UserService.Helpers;
+using UserService.MessageBus;
 using UserService.Models;
 using UserService.Services;
 
@@ -13,10 +14,12 @@ namespace UserService.Controllers
     public class UserController : ControllerBase
     {
         private IUserService _userService;
+        private IMessageBusClient _messageBusClient;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IMessageBusClient messageBusClient)
         {
             _userService = userService;
+            _messageBusClient = messageBusClient;
         }
 
         [HttpGet]
@@ -38,10 +41,12 @@ namespace UserService.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteUser()
         {
-            var isSuccessful = await _userService.DeleteAsync(HttpContext.GetUserId());
+            var username = HttpContext.GetUserId();
+            var isSuccessful = await _userService.DeleteAsync(username);
 
             if (isSuccessful)
             {
+                _messageBusClient.PublishDeleteUserEvent(username);
                 return Ok();
             }
             else

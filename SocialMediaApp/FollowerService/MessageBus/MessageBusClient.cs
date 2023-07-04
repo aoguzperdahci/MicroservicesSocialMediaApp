@@ -3,7 +3,7 @@ using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
 
-namespace UserService.MessageBus
+namespace FollowerService.MessageBus
 {
     public class MessageBusClient : BackgroundService, IMessageBusClient
     {
@@ -25,7 +25,7 @@ namespace UserService.MessageBus
         private void InitializeRabbitMQ()
         {
             var factory = new ConnectionFactory() { HostName = _configuration["RabbitMQHost"], Port = int.Parse(_configuration["RabbitMQPort"]) };
-            factory.ClientProvidedName = "UserService";
+            factory.ClientProvidedName = "FollowerService";
 
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
@@ -72,12 +72,6 @@ namespace UserService.MessageBus
                             body: body);
         }
 
-        public void PublishCreateUserEvent(string message) //gets username as the message
-        {
-            MessageEvent messageEvent = new MessageEvent { EventType = "UserCreated", Message = message };
-            SendMessage(JsonSerializer.Serialize(messageEvent));
-        }
-
         public override void Dispose()
         {
             if (_channel.IsOpen)
@@ -87,12 +81,6 @@ namespace UserService.MessageBus
             }
 
             base.Dispose();
-        }
-
-        public void PublishDeleteUserEvent(string message)
-        {
-            MessageEvent messageEvent = new MessageEvent { EventType = "UserDeleted", Message = message };
-            SendMessage(JsonSerializer.Serialize(messageEvent));
         }
     }
 }

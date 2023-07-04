@@ -1,13 +1,17 @@
-using FollowerService.Consumers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Neo4jClient;
+using NSwag.Generation.Processors.Security;
+using NSwag;
+using System.Text;
+using FollowerService.Services;
+using FollowerService.MessageBus;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
-builder.Services.AddScoped<UserCreatedEventConsumer>();
-
 
 var connectionString = "bolt://localhost:7687"; // Neo4j server URI
 var username = "neo4j"; // Neo4j username
@@ -19,26 +23,69 @@ var graphClient = new BoltGraphClient(new Uri(connectionString), username, passw
 // Connect to the Neo4j database
 graphClient.ConnectAsync();
 builder.Services.AddSingleton<IGraphClient>(graphClient);
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddOpenApiDocument(options =>
+{
+    options.Title = "Follower Service";
+    options.DocumentName = "follower-service";
+    options.OperationProcessors.Add(new OperationSecurityScopeProcessor("auth"));
+    options.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT Token"));
+    options.DocumentProcessors.Add(new SecurityDefinitionAppender("auth", new NSwag.OpenApiSecurityScheme
+    {
+        Type = OpenApiSecuritySchemeType.Http,
+        In = OpenApiSecurityApiKeyLocation.Header,
+        Scheme = "bearer",
+        BearerFormat = "jwt"
+    }));
+});
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
+                .GetBytes(builder.Configuration.GetSection("Secret:Key").Value)),
+            ValidateIssuer = false,
+            ValidateLifetime = true,
+            ValidateAudience = false
+        };
+    });
+
+builder.Services.AddCors(options => options.AddPolicy(name: "AcceptAll",
+    policy =>
+    {
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    }));
+
+builder.Services.AddScoped<IFollowerService, Neo4jFollowerService>();
+builder.Services.AddSingleton<IMessageBusClient, MessageBusClient>();
+builder.Services.AddSingleton<IEventProcessor, EventProcessor>();
+builder.Services.AddHostedService<MessageBusClient>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger(c =>
+    app.UseOpenApi(options =>
     {
-        c.SerializeAsV2 = true;
+        options.Path = "v1/openapi/follower-service.yaml";
+        options.DocumentName = "follower-service";
     });
-    app.UseSwaggerUI(c =>
+
+    app.UseSwaggerUi3(options =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1");
+        options.Path = "/openapi";
+        options.DocumentPath = "/v1/openapi/follower-service.yaml";
     });
 }
+app.UseCors("AcceptAll");
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

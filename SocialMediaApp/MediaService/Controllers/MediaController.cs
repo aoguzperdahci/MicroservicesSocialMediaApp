@@ -7,36 +7,28 @@ namespace MediaService.Controllers
     [ApiController]
     public class MediaController : ControllerBase
     {
-        [HttpPost]
-        [Route("UploadFile")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
 
-        public async Task<IActionResult> UploadFile(IFormFile file, CancellationToken cancellationtoken)
-        {
-            var result = await WriteFile(file);
-            return Ok(result);
-        }
 
-        private async Task<string> WriteFile(IFormFile file)
+        [HttpGet("{username}/{filename}")]
+        private async Task<IActionResult> WriteFile(string username, string filename, IFormFile file)
         {
-            string filename = "";
+           // string filename = "";
             try
             {
-                var extension = "." + file.FileName.Split('.')[file.FileName.Split('.').Length - 1];
-                filename = DateTime.Now.Ticks.ToString() + extension;
+               // var extension = "." + file.FileName.Split('.')[file.FileName.Split('.').Length - 1];
+                //filename = DateTime.Now.Ticks.ToString() + extension;
 
-                var filepath = Path.Combine("c://socialMedia", filename);
+                var filepath = Path.Combine("c://socialMedia", username);
 
-                if(!Directory.Exists(filepath))
+                if (!Directory.Exists(filepath))
                 {
                     Directory.CreateDirectory(filepath);
                 }
-                
-                var exactpath = Path.Combine("c://socialMedia", filename);
+
+                //var exactpath = Path.Combine("c://socialMedia", filename);
 
                 //var exactpath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\MediaFiles", filename);
-                using (var stream = new FileStream(exactpath, FileMode.Create))
+                using (var stream = new FileStream(filepath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
@@ -44,8 +36,56 @@ namespace MediaService.Controllers
             catch (Exception ex)
             {
             }
-            return filename;
+            return Ok();
         }
 
+
+
+
+
+
+
+        /* [HttpPost]
+         [Route("UploadFile")]
+         [ProducesResponseType(StatusCodes.Status200OK)]
+         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+
+         public async Task<IActionResult> UploadFile(IFormFile file, CancellationToken cancellationtoken)
+         {
+             var result = await WriteFile(file);
+             return Ok(result);
+         }*/
+
+        
+      /*   private async Task<string> WriteFile(IFormFile file)
+          {
+              string filename = "";
+              try
+              {
+                  var extension = "." + file.FileName.Split('.')[file.FileName.Split('.').Length - 1];
+                  filename = DateTime.Now.Ticks.ToString() + extension;
+
+                  var filepath = Path.Combine("c://socialMedia", filename);
+
+                  if(!Directory.Exists(filepath))
+                  {
+                      Directory.CreateDirectory(filepath);
+                  }
+
+                  var exactpath = Path.Combine("c://socialMedia", filename);
+
+                  //var exactpath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\MediaFiles", filename);
+                  using (var stream = new FileStream(exactpath, FileMode.Create))
+                  {
+                      await file.CopyToAsync(stream);
+                  }
+              }
+              catch (Exception ex)
+              {
+              }
+              return filename;
+          }*/
+
+      
     }
 }

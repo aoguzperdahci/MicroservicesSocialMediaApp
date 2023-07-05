@@ -17,6 +17,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IPostService, PostService.Services.PostService>();
+builder.Services.AddHttpClient();
+
+services.AddDbContext<PostDataContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
 var app = builder.Build();
 

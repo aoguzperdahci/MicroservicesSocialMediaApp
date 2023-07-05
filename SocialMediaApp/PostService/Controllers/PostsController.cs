@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using PostService.Requests;
 using PostService.Responses;
 using PostService.Services;
+using System.Net.Http;
+using System.Text;
 
 namespace PostService.Controllers
 {
@@ -12,12 +15,12 @@ namespace PostService.Controllers
     public class PostsController : ControllerBase
     {
         private readonly ILogger<PostsController> logger;
-
+        private readonly HttpClient _httpClient;
 
         private readonly IPostService postService;
 
 
-        public PostsController(ILogger<PostsController> logger, IPostService postService)
+        public PostsController(ILogger<PostsController> logger, IPostService postService, HttpClient httpClient)
 
 
         {
@@ -25,7 +28,7 @@ namespace PostService.Controllers
 
             this.logger = logger;
 
-
+            _httpClient = httpClient;
             this.postService = postService;
 
 
@@ -73,12 +76,49 @@ namespace PostService.Controllers
 
             if (postRequest.Image != null)
 
-
             {
-               
-
                 // Send a request to the Media service to save the selected image
-                using (var httpClient = new HttpClient())
+                var requestData = new FormUrlEncodedContent(new[]
+{
+    new KeyValuePair<string, string>("username", username),
+    new KeyValuePair<string, string>("filename", postRequest.ImagePath)
+});
+                /*
+                                 * = new
+                {
+                    Username = username,
+                    Filename = postRequest.ImagePath
+                };*/
+                //var jsonContent = new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json");
+
+                //var username = "John Doe";
+                var filename = postRequest.ImagePath;
+
+                var data = new { username, filename };
+                var json = JsonConvert.SerializeObject(data);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                // Send the POST request to the Media service
+                //var response = await _httpClient.PostAsJsonAsync("http://localhost:7040/swagger/index.html", requestData);
+                string mediaServiceUri = "http://localhost:7040/swagger/index.html";
+
+                    HttpClient httpClient = new HttpClient();
+                    //HttpResponseMessage response = await httpClient.GetAsync(mediaServiceUri);
+                    HttpResponseMessage response = await httpClient.PostAsync("http://localhost:7040/swagger/index.html", content);
+                
+                var responseContent = await response.Content.ReadAsStringAsync();
+                //var jsonContent = new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json");
+
+                // Send the POST request with the JSON data
+                //HttpResponseMessage response = await httpClient.PostAsync(mediaServiceUri, jsonContent);
+
+
+                // Check the response status
+                response.EnsureSuccessStatusCode();
+
+                    // Process the response if needed
+                
+            
+                /*using (var httpClient = new HttpClient())
                 {
                     var mediaServiceUrl = "http://localhost:7040/api/media"; // Replace with the actual Media service URL
                     var formData = new MultipartFormDataContent();
@@ -91,10 +131,10 @@ namespace PostService.Controllers
                     {
                         return StatusCode((int)response.StatusCode, "Error occurred while saving the image in the Media service.");
                     }
-                }
+                }*/
 
 
-                await postService.SavePostImageAsync(postRequest);
+                //await postService.SavePostImageAsync(postRequest);
 
 
             }

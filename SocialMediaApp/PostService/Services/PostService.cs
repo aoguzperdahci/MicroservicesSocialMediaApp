@@ -39,7 +39,7 @@ namespace PostService.Services
 
 
             {
-
+                Id = 1,
 
                 UserId = postRequest.UserId,
 
@@ -57,6 +57,8 @@ namespace PostService.Services
 
 
             };
+            System.Net.ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+
 
             // Post=> Posts
             var postEntry = await socialDbContext.Posts.AddAsync(post);

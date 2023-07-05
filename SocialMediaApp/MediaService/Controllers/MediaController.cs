@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using MediaService.Requests;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediaService.Controllers
@@ -11,14 +12,16 @@ namespace MediaService.Controllers
 
         //[HttpGet("{username}/{filename}")]
         [HttpPost]
-        [Route("api/media")]
-        private async Task<IActionResult> WriteFile(string username, string filename, IFormFile file)
+        //[Route("media")]
+        private async Task<IActionResult> WriteFile([FromBody] MediaRequest mediaRequest/*string username, string filename, IFormFile file*/)
         {
            // string filename = "";
             try
             {
-               // var extension = "." + file.FileName.Split('.')[file.FileName.Split('.').Length - 1];
+                // var extension = "." + file.FileName.Split('.')[file.FileName.Split('.').Length - 1];
                 //filename = DateTime.Now.Ticks.ToString() + extension;
+                string username = mediaRequest.Username;
+                string filename = mediaRequest.Filename;
 
                 var filepath = Path.Combine("c://socialMedia", username);
 
@@ -32,7 +35,7 @@ namespace MediaService.Controllers
                 //var exactpath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\MediaFiles", filename);
                 using (var stream = new FileStream(filepath, FileMode.Create))
                 {
-                    await file.CopyToAsync(stream);
+                    //await file.CopyToAsync(stream);
                 }
             }
             catch (Exception ex)

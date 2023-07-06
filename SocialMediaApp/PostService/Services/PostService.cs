@@ -23,17 +23,26 @@ namespace PostService.Services
             var saveResponse = await dbContext.SaveChangesAsync();
         }
 
-        public List<Post> GetPostsByUserId(List<string> followedUsers)
+        public List<Post> GetPostsByUserId(List<string> followedUsers, int page, int pageSize)
         {
-            var posts = dbContext.Posts.Where(p => followedUsers.Contains(p.Username)).OrderByDescending(p => p.PublisTime).ToList();
+            var posts = dbContext.Posts
+                .Skip(page * pageSize)
+                .Where(p => followedUsers
+                .Contains(p.Username))
+                .OrderByDescending(p => p.PublishTime)
+                .Take(pageSize)
+                .ToList();
+
             return posts;
         }
 
-        public List<Post> GetProfilePosts(string username)
+        public List<Post> GetProfilePosts(string username, int page, int pageSize)
         {
             var posts = dbContext.Posts
                 .Where(p => p.Username == username)
-                .OrderByDescending(p => p.PublisTime)
+                .Skip(page * pageSize)
+                .OrderByDescending(p => p.PublishTime)
+                .Take(pageSize)
                 .ToList();
 
             return posts;

@@ -7,7 +7,7 @@ namespace PostService.Services
     public interface IPostService
     {
         Task CreatePostAsync(Post post);
-        List<Post> GetPostsByUserId(List<string> followedUsers);
-        List<Post> GetProfilePosts(string username);
+        List<Post> GetPostsByUserId(List<string> followedUsers, int page, int pageSize);
+        List<Post> GetProfilePosts(string username, int page, int pageSize);
     }
 }

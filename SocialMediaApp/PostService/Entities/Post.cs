@@ -11,6 +11,7 @@ namespace PostService.Entities
         public int Id { get; set; }
         public string Username { get; set; }
         public string Image { get; set; }
-        public DateTime PublisTime { get; set; }
+        public string Description { get; set; }
+        public DateTime PublishTime { get; set; }
     }
 }

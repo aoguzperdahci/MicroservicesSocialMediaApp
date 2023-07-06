@@ -20,7 +20,7 @@ namespace PostService.Controllers
     public class PostsController : ControllerBase
     {
         private readonly IPostService postService;
-        string apiGatawayUri = "http://localhost:700/api/Media";
+        string apiGatawayUri = "http://localhost:7000";
 
 
         public PostsController(IPostService postService)
@@ -52,41 +52,36 @@ namespace PostService.Controllers
 
             HttpResponseMessage response = await httpClient.PostAsync(mediaServiceUri, multipartContent);
                 
-            var responseContent = await response.Content.ReadAsStringAsync();
-
             var imgUrl = @"http://localhost:7080/" + username + "/" + filename;
 
-            await postService.CreatePostAsync(new Post { Image = imgUrl, PublisTime = DateTime.Now, Username = username});
+            await postService.CreatePostAsync(new Post { Image = imgUrl, PublishTime = DateTime.Now, Username = username});
 
             return Ok();
         }
 
-        [HttpGet("MainFeed/{username}")]
-        public IActionResult GetMainFeed(string username)
+        [HttpGet("main-feed")]
+        public async Task<IActionResult> GetMainFeedAsync([FromQuery] int page, [FromQuery] int pageSize)
         {
-            string followerServiceUri = apiGatawayUri + "/FollowerService/api/";
+            var username = HttpContext.GetUserId();
+            string followerServiceUri = apiGatawayUri + "/FollowerService/api/User/following/" + username;
 
-            //HttpClient httpClient = new HttpClient();
+            HttpClient httpClient = new HttpClient();
 
-            //HttpResponseMessage response = await httpClient.PostAsync(mediaServiceUri, multipartContent);
+            HttpResponseMessage response = await httpClient.GetAsync(followerServiceUri);
 
-            //List<string> followedUsers = GetFollowers(username); // Kullanıcının takip ettiği kullanıcıları almak için bir metot kullanılabilir
+            var content = await response.Content.ReadAsStringAsync();
 
-            //var userPosts = postService.GetPostsByUserId(followedUsers);
+            List<string> followedUsers = JsonConvert.DeserializeObject<List<string>>(content);
 
-            // Sayfalama işlemleri yapılır
+            var userPosts = postService.GetPostsByUserId(followedUsers, page, pageSize);
 
-            //return Ok(userPosts);
-            return Ok();
+            return Ok(userPosts);
         }
 
-        [HttpGet("ProfileFeed/{username}")]
-        public IActionResult ProfileFeed(string username)
+        [HttpGet("profile-feed/{username}")]
+        public IActionResult ProfileFeed(string username, [FromQuery] int page, [FromQuery] int pageSize)
         {
-            var userPosts = postService.GetProfilePosts(username);
-
-            // Sayfalama işlemleri yapılır
-
+            var userPosts = postService.GetProfilePosts(username, page, pageSize);
             return Ok(userPosts);
         }
     }

@@ -7,13 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "APIGateway", "APIGateway\AP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FollowerService", "FollowerService\FollowerService.csproj", "{B5079F2E-DA70-4C0B-9BF2-520AF7EC0C13}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaService", "MediaService\MediaService.csproj", "{0EE9B6EC-9C64-4CCD-A3C5-2701DC9555D8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediaService", "MediaService\MediaService.csproj", "{0EE9B6EC-9C64-4CCD-A3C5-2701DC9555D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PostService", "PostService\PostService.csproj", "{D089ED49-B6F1-4A35-8AB6-69068593B10F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PostService", "PostService\PostService.csproj", "{D089ED49-B6F1-4A35-8AB6-69068593B10F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeedService", "FeedService\FeedService.csproj", "{829C55F8-0C96-4208-8842-58722EA28D02}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService", "UserService\UserService.csproj", "{6D3FAC0A-6D9C-47D6-9D64-8D0F78FBA93C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService", "UserService\UserService.csproj", "{6D3FAC0A-6D9C-47D6-9D64-8D0F78FBA93C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,10 +35,6 @@ Global
 		{D089ED49-B6F1-4A35-8AB6-69068593B10F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D089ED49-B6F1-4A35-8AB6-69068593B10F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D089ED49-B6F1-4A35-8AB6-69068593B10F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{829C55F8-0C96-4208-8842-58722EA28D02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{829C55F8-0C96-4208-8842-58722EA28D02}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{829C55F8-0C96-4208-8842-58722EA28D02}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{829C55F8-0C96-4208-8842-58722EA28D02}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6D3FAC0A-6D9C-47D6-9D64-8D0F78FBA93C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6D3FAC0A-6D9C-47D6-9D64-8D0F78FBA93C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D3FAC0A-6D9C-47D6-9D64-8D0F78FBA93C}.Release|Any CPU.ActiveCfg = Release|Any CPU

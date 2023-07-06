@@ -38,7 +38,7 @@ namespace UserService.Services
                 return false;
 
             // map model to new user object
-            var user = new User { Username= request.Username, Email = request.Email, Name = request.Name };
+            var user = new User { Username= request.Username, Email = request.Email, Name = request.Name, ProfilePicture =  ""};
 
             user.PasswordSalt = BCrypt.Net.BCrypt.GenerateSalt();
             // hash password

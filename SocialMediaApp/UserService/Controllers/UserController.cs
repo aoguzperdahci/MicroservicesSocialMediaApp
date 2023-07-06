@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Mime;
+using System.Text;
 using UserService.Helpers;
 using UserService.MessageBus;
 using UserService.Models;
@@ -15,6 +17,7 @@ namespace UserService.Controllers
     {
         private IUserService _userService;
         private IMessageBusClient _messageBusClient;
+        string apiGatawayUri = "http://localhost:7000";
 
         public UserController(IUserService userService, IMessageBusClient messageBusClient)
         {
@@ -33,7 +36,7 @@ namespace UserService.Controllers
             }
             else
             {
-                var userDTO = new UserDTO { Username = user.Username, Name = user.Name, Email = user.Email, ProfilePhoto = user.ProfilePhoto };
+                var userDTO = new UserDTO { Username = user.Username, Name = user.Name, Email = user.Email, ProfilePicture = user.ProfilePicture };
                 return Ok(userDTO);
             }
         }
@@ -49,7 +52,7 @@ namespace UserService.Controllers
             }
             else
             {
-                var userDTO = new UserDTO { Username = user.Username, Name = user.Name, Email = user.Email, ProfilePhoto = user.ProfilePhoto };
+                var userDTO = new UserDTO { Username = user.Username, Name = user.Name, Email = user.Email, ProfilePicture = user.ProfilePicture };
                 return Ok(userDTO);
             }
         }
@@ -70,6 +73,34 @@ namespace UserService.Controllers
             {
                 return BadRequest();
             }
+        }
+
+        [HttpPut("/profile-picture")]
+        [RequestSizeLimit(10 * 1024 * 1024)]
+        public async Task<IActionResult> UpdateProfilePicture([FromForm] UpdateProfilePhotoRequest request)
+        {
+            var username = HttpContext.GetUserId();
+            var filename = FileHelper.GetUniqueFileName(request.File.FileName);
+
+            using MultipartFormDataContent multipartContent = new();
+            multipartContent.Add(new StringContent(username, Encoding.UTF8, MediaTypeNames.Text.Plain), "Username");
+            multipartContent.Add(new StringContent(filename, Encoding.UTF8, MediaTypeNames.Text.Plain), "Filename");
+
+            byte[] data;
+            using (var br = new BinaryReader(request.File.OpenReadStream()))
+                data = br.ReadBytes((int)request.File.OpenReadStream().Length);
+
+            ByteArrayContent bytes = new ByteArrayContent(data);
+            multipartContent.Add(bytes, "file", "File");
+
+            string mediaServiceUri = apiGatawayUri + "/MediaService/api/Media";
+
+            HttpClient httpClient = new HttpClient();
+
+            HttpResponseMessage response = await httpClient.PostAsync(mediaServiceUri, multipartContent);
+
+            return Ok();
+
         }
 
     }

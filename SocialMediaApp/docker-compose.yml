@@ -20,7 +20,3 @@ services:
     build: ./MediaService
     ports:
       - 7040:80
-  feed-service:
-    build: ./FeedService
-    ports:
-      - 7050:80

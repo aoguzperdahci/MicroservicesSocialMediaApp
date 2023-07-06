@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace UserService.Entities
@@ -13,6 +14,7 @@ namespace UserService.Entities
         public string PasswordHash { get; set; }
         [JsonIgnore]
         public string PasswordSalt { get; set; }
-        public string ProfilePhoto { get; set; }
+        [AllowNull]
+        public string ProfilePicture { get; set; }
     }
 }

@@ -10,7 +10,7 @@
         }
       ],
       "UpstreamPathTemplate": "/FollowerService/{endpoint}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Options" ]
     },
     {
       "DownstreamPathTemplate": "/{endpoint}",
@@ -22,7 +22,7 @@
         }
       ],
       "UpstreamPathTemplate": "/UserService/{endpoint}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Options" ]
     },
     {
       "DownstreamPathTemplate": "/{endpoint}",
@@ -34,7 +34,7 @@
         }
       ],
       "UpstreamPathTemplate": "/PostService/{endpoint}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Options" ]
     },
     {
       "DownstreamPathTemplate": "/{endpoint}",
@@ -46,7 +46,7 @@
         }
       ],
       "UpstreamPathTemplate": "/MediaService/{endpoint}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Options" ]
     },
     {
       "DownstreamPathTemplate": "/{endpoint}",
@@ -58,7 +58,7 @@
         }
       ],
       "UpstreamPathTemplate": "/FeedService/{endpoint}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Options" ]
     }
   ]
 }

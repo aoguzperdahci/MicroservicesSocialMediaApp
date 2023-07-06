@@ -43,7 +43,7 @@ namespace PostService.Services
             {
                 Id = 1,
 
-                UserId = postRequest.UserId,
+                Username = postRequest.Username,
 
 
                 Description = postRequest.Description,
@@ -102,7 +102,7 @@ namespace PostService.Services
                 Imagepath = Path.Combine(postEntity.Imagepath),
 
 
-                UserId = postEntity.UserId
+                Username = postEntity.Username
 
 
             };
@@ -112,13 +112,24 @@ namespace PostService.Services
 
 
         }
-        public List<Post> GetPostsByUserId(int userId)
+        public List<Post> GetPostsByUserId(List<string> followedUsers)
         {
-            var posts = socialDbContext.Posts
-                .Where(p => p.UserId == userId)
-                .ToList();
+            var posts = socialDbContext.Posts.Where(p => followedUsers.Contains(p.Username)).OrderByDescending(p => p.Ts).ToList();
 
             return posts;
+        }
+
+        public List<Post> GetProfilePosts(string username)
+        {
+            var posts = socialDbContext.Posts
+    .Where(p => p.Username == username)
+    .OrderByDescending(p => p.Ts)
+    .ToList();
+
+
+
+            return posts;
+            
         }
 
         /* public async Task SavePostImageAsync(PostRequest postRequest)

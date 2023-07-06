@@ -11,7 +11,8 @@ namespace PostService.Services
 
 
         Task<PostResponse> CreatePostAsync(PostRequest postRequest);
-        List<Post> GetPostsByUserId(int userId);
+        List<Post> GetPostsByUserId(List<string> followedUsers);
+        List<Post> GetProfilePosts(string username);
 
 
 

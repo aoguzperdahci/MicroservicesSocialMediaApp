@@ -136,7 +136,35 @@ namespace PostService.Controllers
 
 
         }
+        [HttpGet("MainFeed/{username}")]
+        public IActionResult GetMainFeed(string username)
+        {
+            // Kullanıcının takip ettiği kullanıcıların postlarını almak için gerekli işlemler yapılır
+            //follower servisten alınabilir?
+            List<string> followedUsers = GetFollowers(username); // Kullanıcının takip ettiği kullanıcıları almak için bir metot kullanılabilir
 
+            var userPosts = postService.GetPostsByUserId(followedUsers);
+
+
+            // Sayfalama işlemleri yapılır
+            
+
+            return Ok(userPosts);
+        }
+
+        [HttpGet("ProfileFeed/{username}")]
+        public IActionResult ProfileFeed(string username)
+        {
+
+
+            var userPosts = postService.GetProfilePosts(username);
+
+
+            // Sayfalama işlemleri yapılır
+
+
+            return Ok(userPosts);
+        }
         /*[HttpGet("MainFeed/{username}")]
         public IActionResult GetMainFeed(string username)
         {

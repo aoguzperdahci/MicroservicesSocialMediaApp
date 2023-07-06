@@ -54,7 +54,7 @@ namespace PostService.Controllers
                 
             var imgUrl = @"http://localhost:7080/" + username + "/" + filename;
 
-            await postService.CreatePostAsync(new Post { Image = imgUrl, PublishTime = DateTime.Now, Username = username});
+            await postService.CreatePostAsync(new Post { Image = imgUrl, PublishTime = DateTime.Now, Username = username, Description = post.Description});
 
             return Ok();
         }

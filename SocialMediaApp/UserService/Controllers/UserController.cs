@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using UserService.Helpers;
+using UserService.MessageBus;
 using UserService.Models;
 using UserService.Services;
 
@@ -13,10 +14,12 @@ namespace UserService.Controllers
     public class UserController : ControllerBase
     {
         private IUserService _userService;
+        private IMessageBusClient _messageBusClient;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IMessageBusClient messageBusClient)
         {
             _userService = userService;
+            _messageBusClient = messageBusClient;
         }
 
         [HttpGet]
@@ -30,18 +33,37 @@ namespace UserService.Controllers
             }
             else
             {
-                var userDTO = new UserDTO { Username = user.Username, Name = user.Name, Email = user.Email };
+                var userDTO = new UserDTO { Username = user.Username, Name = user.Name, Email = user.Email, ProfilePhoto = user.ProfilePhoto };
                 return Ok(userDTO);
             }
         }
 
+        [HttpGet("/{username}")]
+        public async Task<IActionResult> GetUserByUsername(string username)
+        {
+            var user = await _userService.GetByUsernameAsync(username);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                var userDTO = new UserDTO { Username = user.Username, Name = user.Name, Email = user.Email, ProfilePhoto = user.ProfilePhoto };
+                return Ok(userDTO);
+            }
+        }
+
+
         [HttpDelete]
         public async Task<IActionResult> DeleteUser()
         {
-            var isSuccessful = await _userService.DeleteAsync(HttpContext.GetUserId());
+            var username = HttpContext.GetUserId();
+            var isSuccessful = await _userService.DeleteAsync(username);
 
             if (isSuccessful)
             {
+                _messageBusClient.PublishDeleteUserEvent(username);
                 return Ok();
             }
             else

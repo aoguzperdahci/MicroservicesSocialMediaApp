@@ -3,6 +3,8 @@ using PostService.Responses.Models;
 using PostService.Responses;
 using PostService.Helpers;
 using PostService.Data;
+using Microsoft.EntityFrameworkCore;
+using PostService.Entities;
 
 namespace PostService.Services
 {
@@ -110,30 +112,37 @@ namespace PostService.Services
 
 
         }
-
-
-        public async Task SavePostImageAsync(PostRequest postRequest)
-
-
+        public List<Post> GetPostsByUserId(int userId)
         {
+            var posts = socialDbContext.Posts
+                .Where(p => p.UserId == userId)
+                .ToList();
 
-            
-            var uniqueFileName = FileHelper.GetUniqueFileName(postRequest.Image.FileName);
-            var uploads = Path.Combine(environment.WebRootPath, "users", "posts", postRequest.UserId.ToString());
-
-            var filePath = Path.Combine(uploads, uniqueFileName);
-
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-
-
-            await postRequest.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
-
-            postRequest.ImagePath = filePath;
-
-
-            return;
-
-
+            return posts;
         }
+
+        /* public async Task SavePostImageAsync(PostRequest postRequest)
+
+
+         {
+
+
+             var uniqueFileName = FileHelper.GetUniqueFileName(postRequest.Image.FileName);
+             var uploads = Path.Combine(environment.WebRootPath, "users", "posts", postRequest.UserId.ToString());
+
+             var filePath = Path.Combine(uploads, uniqueFileName);
+
+             Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+
+             await postRequest.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+
+             postRequest.ImagePath = filePath;
+
+
+             return;
+
+
+         }*/
     }
 }

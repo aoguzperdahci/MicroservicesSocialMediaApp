@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using PostService.Entities;
+using PostService.Helpers;
 using PostService.Requests;
 using PostService.Responses;
 using PostService.Services;
@@ -78,21 +80,16 @@ namespace PostService.Controllers
 
             {
                 // Send a request to the Media service to save the selected image
+                var filename = FileHelper.GetUniqueFileName(postRequest.Image.FileName);
                 var requestData = new FormUrlEncodedContent(new[]
 {
     new KeyValuePair<string, string>("username", username),
-    new KeyValuePair<string, string>("filename", postRequest.ImagePath)
-});
-                /*
-                                 * = new
-                {
-                    Username = username,
-                    Filename = postRequest.ImagePath
-                };*/
-                //var jsonContent = new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json");
+    new KeyValuePair<string, string>("filename", filename),
+    //postRequest.Image
 
-                //var username = "John Doe";
-                var filename = postRequest.ImagePath;
+});
+
+                
 
                 var data = new { username, filename };
                 var json = JsonConvert.SerializeObject(data);
@@ -101,37 +98,17 @@ namespace PostService.Controllers
                 //var response = await _httpClient.PostAsJsonAsync("http://localhost:7040/swagger/index.html", requestData);
                 string mediaServiceUri = "http://localhost:7040/swagger/index.html";
 
-                    HttpClient httpClient = new HttpClient();
-                    //HttpResponseMessage response = await httpClient.GetAsync(mediaServiceUri);
-                    HttpResponseMessage response = await httpClient.PostAsync("http://localhost:7040/swagger/index.html", content);
+                HttpClient httpClient = new HttpClient();
+                //HttpResponseMessage response = await httpClient.GetAsync(mediaServiceUri);
+                HttpResponseMessage response = await httpClient.PostAsync("http://localhost:7040/swagger/index.html", content);
                 
                 var responseContent = await response.Content.ReadAsStringAsync();
-                //var jsonContent = new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json");
-
-                // Send the POST request with the JSON data
-                //HttpResponseMessage response = await httpClient.PostAsync(mediaServiceUri, jsonContent);
 
 
                 // Check the response status
                 response.EnsureSuccessStatusCode();
 
-                    // Process the response if needed
-                
-            
-                /*using (var httpClient = new HttpClient())
-                {
-                    var mediaServiceUrl = "http://localhost:7040/api/media"; // Replace with the actual Media service URL
-                    var formData = new MultipartFormDataContent();
-                    formData.Add(new StringContent(postRequest.ImagePath),"file");
-                    formData.Add(new StringContent(username), "username");
 
-                    var response = await httpClient.PostAsync($"{mediaServiceUrl}/api/media", formData);
-
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        return StatusCode((int)response.StatusCode, "Error occurred while saving the image in the Media service.");
-                    }
-                }*/
 
 
                 //await postService.SavePostImageAsync(postRequest);
@@ -159,6 +136,30 @@ namespace PostService.Controllers
 
 
         }
+
+        /*[HttpGet("MainFeed/{username}")]
+        public IActionResult GetMainFeed(string username)
+        {
+            // Kullanıcının takip ettiği kullanıcıların postlarını almak için gerekli işlemler yapılır
+            //follower servisten alınabilir?
+            var followedUsers = GetFollowers(username); // Kullanıcının takip ettiği kullanıcıları almak için bir metot kullanılabilir
+
+            // Takip edilen kullanıcıların postlarından oluşan bir liste elde edilir
+            var allPosts = new List<Post>();
+            foreach (var user in followedUsers)
+            {
+                var userPosts = postService.GetPostsByUserId(user); // Kullanıcının postlarını almak için bir metot kullanılabilir
+                allPosts.AddRange(userPosts);
+            }
+
+            // Postları en yeni olandan en eskiye doğru sıralar
+            var sortedPosts = allPosts.OrderByDescending(p => p.Ts);
+
+            // Sayfalama işlemleri yapılır
+            
+
+            return Ok(sortedPosts);
+        }*/
 
     }
 }

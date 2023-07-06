@@ -13,7 +13,7 @@ namespace MediaService.Controllers
         //[HttpGet("{username}/{filename}")]
         [HttpPost]
         //[Route("media")]
-        private async Task<IActionResult> WriteFile([FromBody] MediaRequest mediaRequest/*string username, string filename, IFormFile file*/)
+        private async Task<IActionResult> WriteFile([FromBody] MediaRequest mediaRequest, IFormFile file/*string username, string filename, IFormFile file*/)
         {
            // string filename = "";
             try
@@ -35,7 +35,7 @@ namespace MediaService.Controllers
                 //var exactpath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\MediaFiles", filename);
                 using (var stream = new FileStream(filepath, FileMode.Create))
                 {
-                    //await file.CopyToAsync(stream);
+                    await file.CopyToAsync(stream);
                 }
             }
             catch (Exception ex)

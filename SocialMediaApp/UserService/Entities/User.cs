@@ -13,5 +13,6 @@ namespace UserService.Entities
         public string PasswordHash { get; set; }
         [JsonIgnore]
         public string PasswordSalt { get; set; }
+        public string ProfilePhoto { get; set; }
     }
 }

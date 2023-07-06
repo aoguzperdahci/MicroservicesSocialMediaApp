@@ -33,10 +33,27 @@ namespace UserService.Controllers
             }
             else
             {
-                var userDTO = new UserDTO { Username = user.Username, Name = user.Name, Email = user.Email };
+                var userDTO = new UserDTO { Username = user.Username, Name = user.Name, Email = user.Email, ProfilePhoto = user.ProfilePhoto };
                 return Ok(userDTO);
             }
         }
+
+        [HttpGet("/{username}")]
+        public async Task<IActionResult> GetUserByUsername(string username)
+        {
+            var user = await _userService.GetByUsernameAsync(username);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                var userDTO = new UserDTO { Username = user.Username, Name = user.Name, Email = user.Email, ProfilePhoto = user.ProfilePhoto };
+                return Ok(userDTO);
+            }
+        }
+
 
         [HttpDelete]
         public async Task<IActionResult> DeleteUser()

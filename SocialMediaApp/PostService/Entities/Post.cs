@@ -9,20 +9,8 @@ namespace PostService.Entities
     {
         [Key]
         public int Id { get; set; }
-
-
         public string Username { get; set; }
-
-
-        public string Description { get; set; }
-
-
-        public string Imagepath { get; set; }
-
-
-        public DateTime Ts { get; set; }
-
-
-        public bool Published { get; set; }
+        public string Image { get; set; }
+        public DateTime PublisTime { get; set; }
     }
 }

@@ -1,193 +1,93 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using PostService.Entities;
 using PostService.Helpers;
-using PostService.Requests;
 using PostService.Responses;
 using PostService.Services;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Mime;
 using System.Text;
 
 namespace PostService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PostsController : ControllerBase
     {
-        private readonly ILogger<PostsController> logger;
-        private readonly HttpClient _httpClient;
-
         private readonly IPostService postService;
+        string apiGatawayUri = "http://localhost:700/api/Media";
 
 
-        public PostsController(ILogger<PostsController> logger, IPostService postService, HttpClient httpClient)
-
-
+        public PostsController(IPostService postService)
         {
-
-
-            this.logger = logger;
-
-            _httpClient = httpClient;
             this.postService = postService;
-
-
         }
-
 
         [HttpPost]
-
-
-        [Route("{username}")]
-
-
-        [RequestSizeLimit(5 * 1024 * 1024)]
-
-
-        public async Task<IActionResult> SubmitPost([FromForm] PostRequest postRequest, string username)
-
-
+        [RequestSizeLimit(10 * 1024 * 1024)]
+        public async Task<IActionResult> SubmitPost([FromForm] PostRequest post)
         {
+            var username = HttpContext.GetUserId();
+            var filename = FileHelper.GetUniqueFileName(post.Image.FileName);
 
+            using MultipartFormDataContent multipartContent = new();
+            multipartContent.Add(new StringContent(username, Encoding.UTF8, MediaTypeNames.Text.Plain), "Username");
+            multipartContent.Add(new StringContent(filename, Encoding.UTF8, MediaTypeNames.Text.Plain), "Filename");
 
-            if (postRequest == null)
+            byte[] data;
+            using (var br = new BinaryReader(post.Image.OpenReadStream()))
+                data = br.ReadBytes((int)post.Image.OpenReadStream().Length);
+            
+            ByteArrayContent bytes = new ByteArrayContent(data);
+            multipartContent.Add(bytes, "file", "File");
 
+            string mediaServiceUri = apiGatawayUri + "/MediaService/api/Media";
 
-            {
+            HttpClient httpClient = new HttpClient();
 
-
-                return BadRequest(new PostResponse { Success = false, ErrorCode = "S01", Error = "Invalid post request" });
-
-
-            }
-
-
-            if (string.IsNullOrEmpty(Request.GetMultipartBoundary()))
-
-
-            {
-
-
-                return BadRequest(new PostResponse { Success = false, ErrorCode = "S02", Error = "Invalid post header" });
-
-
-            }
-
-
-            if (postRequest.Image != null)
-
-            {
-                // Send a request to the Media service to save the selected image
-                var filename = FileHelper.GetUniqueFileName(postRequest.Image.FileName);
-                var requestData = new FormUrlEncodedContent(new[]
-{
-    new KeyValuePair<string, string>("username", username),
-    new KeyValuePair<string, string>("filename", filename),
-    //postRequest.Image
-
-});
-
+            HttpResponseMessage response = await httpClient.PostAsync(mediaServiceUri, multipartContent);
                 
+            var responseContent = await response.Content.ReadAsStringAsync();
 
-                var data = new { username, filename };
-                var json = JsonConvert.SerializeObject(data);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                // Send the POST request to the Media service
-                //var response = await _httpClient.PostAsJsonAsync("http://localhost:7040/swagger/index.html", requestData);
-                string mediaServiceUri = "http://localhost:7040/swagger/index.html";
+            var imgUrl = @"http://localhost:7080/" + username + "/" + filename;
 
-                HttpClient httpClient = new HttpClient();
-                //HttpResponseMessage response = await httpClient.GetAsync(mediaServiceUri);
-                HttpResponseMessage response = await httpClient.PostAsync("http://localhost:7040/swagger/index.html", content);
-                
-                var responseContent = await response.Content.ReadAsStringAsync();
+            await postService.CreatePostAsync(new Post { Image = imgUrl, PublisTime = DateTime.Now, Username = username});
 
-
-                // Check the response status
-                response.EnsureSuccessStatusCode();
-
-
-
-
-                //await postService.SavePostImageAsync(postRequest);
-
-
-            }
-
-
-            var postResponse = await postService.CreatePostAsync(postRequest);
-
-
-            if (!postResponse.Success)
-
-
-            {
-
-
-                return NotFound(postResponse);
-
-
-            }
-
-
-            return Ok(postResponse.Post);
-
-
+            return Ok();
         }
+
         [HttpGet("MainFeed/{username}")]
         public IActionResult GetMainFeed(string username)
         {
-            // Kullanıcının takip ettiği kullanıcıların postlarını almak için gerekli işlemler yapılır
-            //follower servisten alınabilir?
-            List<string> followedUsers = GetFollowers(username); // Kullanıcının takip ettiği kullanıcıları almak için bir metot kullanılabilir
+            string followerServiceUri = apiGatawayUri + "/FollowerService/api/";
 
-            var userPosts = postService.GetPostsByUserId(followedUsers);
+            //HttpClient httpClient = new HttpClient();
 
+            //HttpResponseMessage response = await httpClient.PostAsync(mediaServiceUri, multipartContent);
+
+            //List<string> followedUsers = GetFollowers(username); // Kullanıcının takip ettiği kullanıcıları almak için bir metot kullanılabilir
+
+            //var userPosts = postService.GetPostsByUserId(followedUsers);
 
             // Sayfalama işlemleri yapılır
-            
 
-            return Ok(userPosts);
+            //return Ok(userPosts);
+            return Ok();
         }
 
         [HttpGet("ProfileFeed/{username}")]
         public IActionResult ProfileFeed(string username)
         {
-
-
             var userPosts = postService.GetProfilePosts(username);
 
-
             // Sayfalama işlemleri yapılır
-
 
             return Ok(userPosts);
         }
-        /*[HttpGet("MainFeed/{username}")]
-        public IActionResult GetMainFeed(string username)
-        {
-            // Kullanıcının takip ettiği kullanıcıların postlarını almak için gerekli işlemler yapılır
-            //follower servisten alınabilir?
-            var followedUsers = GetFollowers(username); // Kullanıcının takip ettiği kullanıcıları almak için bir metot kullanılabilir
-
-            // Takip edilen kullanıcıların postlarından oluşan bir liste elde edilir
-            var allPosts = new List<Post>();
-            foreach (var user in followedUsers)
-            {
-                var userPosts = postService.GetPostsByUserId(user); // Kullanıcının postlarını almak için bir metot kullanılabilir
-                allPosts.AddRange(userPosts);
-            }
-
-            // Postları en yeni olandan en eskiye doğru sıralar
-            var sortedPosts = allPosts.OrderByDescending(p => p.Ts);
-
-            // Sayfalama işlemleri yapılır
-            
-
-            return Ok(sortedPosts);
-        }*/
-
     }
 }

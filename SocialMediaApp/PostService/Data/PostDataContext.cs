@@ -12,10 +12,7 @@ namespace PostService.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //optionsBuilder.UseSqlServer(@"Data Source=localhost; Initial Catalog=Posts; Integrated Security=true");
-            optionsBuilder.UseSqlServer(@"Server=DESKTOP-I2VDD13;Database=Posts;Trusted_Connection=True;TrustServerCertificate=True;");
-
-
+            optionsBuilder.UseSqlServer(@"Data Source=localhost; Initial Catalog=Posts; Integrated Security=true");
         }
     }
 }

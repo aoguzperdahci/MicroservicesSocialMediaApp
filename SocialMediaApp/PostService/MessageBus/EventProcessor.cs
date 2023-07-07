@@ -1,6 +1,6 @@
-﻿using FollowerService.Services;
+﻿using PostService.Services;
 
-namespace FollowerService.MessageBus
+namespace PostService.MessageBus
 {
     public class EventProcessor : IEventProcessor
     {
@@ -14,22 +14,14 @@ namespace FollowerService.MessageBus
         public async Task<bool> ProcessEvent(MessageEvent messageEvent)
         {
             Console.WriteLine($"---> {messageEvent.EventType} event for {messageEvent.Message}");
-            bool result = false ;
+            bool result = false;
             switch (messageEvent.EventType)
             {
-                case "UserCreated":
-                    using (var scope = _scopeFactory.CreateScope())
-                    {
-                        var followerService = scope.ServiceProvider.GetRequiredService<IFollowerService>();
-                        await followerService.CreateUser(messageEvent.Message);
-                        result = true;
-                    }
-                    break;
                 case "UserDeleted":
                     using (var scope = _scopeFactory.CreateScope())
                     {
-                        var followerService = scope.ServiceProvider.GetRequiredService<IFollowerService>();
-                        await followerService.DeleteUser(messageEvent.Message);
+                        var postService = scope.ServiceProvider.GetRequiredService<IPostService>();
+                        await postService.DeleteUserPostsAsync(messageEvent.Message);
                         result = true;
                     }
                     break;

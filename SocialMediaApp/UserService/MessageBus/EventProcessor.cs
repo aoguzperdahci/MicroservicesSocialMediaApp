@@ -13,10 +13,11 @@ namespace UserService.MessageBus
 
         public async Task<bool> ProcessEvent(MessageEvent messageEvent)
         {
-            bool result;
+            bool result = false;
+            Console.WriteLine($"---> {messageEvent.EventType} event for {messageEvent.Message}");
             switch (messageEvent.EventType)
             {
-                case "UserCreatedFailed":
+                case "UserCreateFailed":
                     using (var scope = _scopeFactory.CreateScope())
                     {
                         var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
@@ -24,7 +25,7 @@ namespace UserService.MessageBus
                     }
                     break;
                 default:
-                    result= false;
+                    result = true;
                     break;
             }
 

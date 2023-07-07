@@ -19,8 +19,18 @@ namespace PostService.Services
 
         public async Task CreatePostAsync(Post post)
         {
-            var postEntry = await dbContext.Posts.AddAsync(post);
-            var saveResponse = await dbContext.SaveChangesAsync();
+            await dbContext.Posts.AddAsync(post);
+            await dbContext.SaveChangesAsync();
+        }
+
+        public async Task DeleteUserPostsAsync(string username)
+        {
+             var posts = await dbContext.Posts
+                .Where(p => p.Username == username)
+                .ToListAsync();
+
+            dbContext.RemoveRange(posts);
+            await dbContext.SaveChangesAsync();
         }
 
         public List<Post> GetPostsByUserId(List<string> followedUsers, int page, int pageSize)

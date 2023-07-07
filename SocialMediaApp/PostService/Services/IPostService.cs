@@ -9,5 +9,7 @@ namespace PostService.Services
         Task CreatePostAsync(Post post);
         List<Post> GetPostsByUserId(List<string> followedUsers, int page, int pageSize);
         List<Post> GetProfilePosts(string username, int page, int pageSize);
+        Task DeleteUserPostsAsync(string username);
+
     }
 }

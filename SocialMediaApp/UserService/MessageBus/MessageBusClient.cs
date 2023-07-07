@@ -29,9 +29,9 @@ namespace UserService.MessageBus
 
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
-            _channel.ExchangeDeclare(exchange: "trigger", type: ExchangeType.Direct);
-            _channel.QueueDeclare("message-queue", false, false);
-            _channel.QueueBind(queue: "message-queue",
+            _channel.ExchangeDeclare(exchange: "trigger", type: ExchangeType.Fanout);
+            _channel.QueueDeclare("user-message-queue", false, false);
+            _channel.QueueBind(queue: "user-message-queue",
                 exchange: "trigger",
                 routingKey: "routing-key");
         }
@@ -57,7 +57,7 @@ namespace UserService.MessageBus
                 }
             };
 
-            _channel.BasicConsume(queue: "message-queue", autoAck: false, consumer: consumer);
+            _channel.BasicConsume(queue: "user-message-queue", autoAck: false, consumer: consumer);
 
             return Task.CompletedTask;
         }

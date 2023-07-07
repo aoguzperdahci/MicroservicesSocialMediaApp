@@ -31,5 +31,18 @@ namespace UserService.Services
         {
             return await _dataContext.Users.Where(u => u.Username == username).FirstOrDefaultAsync();
         }
+
+        public async Task UpdateUserProfilePictureAsync(string username, string imageUrl)
+        {
+            var user = await GetByUsernameAsync(username);
+
+            if (user == null)
+            {
+                return;
+            }
+
+            user.ProfilePicture = imageUrl;
+            await _dataContext.SaveChangesAsync();
+        }
     }
 }

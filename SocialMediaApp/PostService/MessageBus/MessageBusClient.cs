@@ -3,7 +3,7 @@ using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
 
-namespace FollowerService.MessageBus
+namespace PostService.MessageBus
 {
     public class MessageBusClient : BackgroundService, IMessageBusClient
     {
@@ -25,13 +25,13 @@ namespace FollowerService.MessageBus
         private void InitializeRabbitMQ()
         {
             var factory = new ConnectionFactory() { HostName = _configuration["RabbitMQHost"], Port = int.Parse(_configuration["RabbitMQPort"]) };
-            factory.ClientProvidedName = "FollowerService";
+            factory.ClientProvidedName = "PostService";
 
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
             _channel.ExchangeDeclare(exchange: "trigger", type: ExchangeType.Fanout);
-            _channel.QueueDeclare("follower-message-queue", false, false);
-            _channel.QueueBind(queue: "follower-message-queue",
+            _channel.QueueDeclare("post-message-queue", false, false);
+            _channel.QueueBind(queue: "post-message-queue",
                 exchange: "trigger",
                 routingKey: "routing-key");
         }
@@ -57,7 +57,7 @@ namespace FollowerService.MessageBus
                 }
             };
 
-            _channel.BasicConsume(queue: "follower-message-queue", autoAck: false, consumer: consumer);
+            _channel.BasicConsume(queue: "post-message-queue", autoAck: false, consumer: consumer);
 
             return Task.CompletedTask;
         }

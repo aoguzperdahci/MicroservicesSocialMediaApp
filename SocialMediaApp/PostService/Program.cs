@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using PostService.Data;
+using PostService.MessageBus;
 using PostService.Services;
 using System.Text;
 
@@ -57,6 +58,10 @@ builder.Services.AddCors(options => options.AddPolicy(name: "AcceptAll",
     {
         policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
     }));
+
+services.AddSingleton<IMessageBusClient, MessageBusClient>();
+services.AddSingleton<IEventProcessor, EventProcessor>();
+services.AddHostedService<MessageBusClient>();
 
 var app = builder.Build();
 

@@ -99,8 +99,11 @@ namespace UserService.Controllers
 
             HttpResponseMessage response = await httpClient.PostAsync(mediaServiceUri, multipartContent);
 
-            return Ok();
+            var imgUrl = @"http://localhost:7080/" + username + "/" + filename;
 
+            await _userService.UpdateUserProfilePictureAsync(username, imgUrl);
+
+            return Ok();
         }
 
     }
